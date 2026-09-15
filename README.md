@@ -1,4 +1,4 @@
-# zai-cursor-limit
+# <img src="icon.png" width="48" align="top" alt="zai-cursor-limit"> zai-cursor-limit
 
 Traffic light for z.ai GLM Coding Plan quotas, for Cursor (and any VS Code fork).
 
