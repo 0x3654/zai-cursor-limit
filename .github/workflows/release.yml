@@ -1,0 +1,24 @@
+# Tag v* -> sanity check, build the vsix, attach it to a GitHub Release.
+name: release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install -g @vscode/vsce
+      - run: node --check extension.js
+      # Stable asset name so releases/latest/download/... always resolves.
+      - run: vsce package -o zai-cursor-limit.vsix
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: zai-cursor-limit.vsix

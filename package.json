@@ -1,0 +1,246 @@
+{
+  "name": "zai-cursor-limit",
+  "displayName": "Z.ai Cursor Limit",
+  "description": "z.ai GLM Coding Plan quota traffic light: max/5h/weekly percentage in the status bar, colored robot text, per-level title bar tint",
+  "version": "1.0.0",
+  "publisher": "0x3654",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "zaiCursorLimit.refresh",
+        "title": "Z.ai: refresh quota now"
+      },
+      {
+        "command": "zaiCursorLimit.openDashboard",
+        "title": "Z.ai: open usage dashboard"
+      },
+      {
+        "command": "zaiCursorLimit.testThresholds",
+        "title": "Z.ai: test thresholds (fake percentages)"
+      },
+      {
+        "command": "zaiCursorLimit.resetColors",
+        "title": "Z.ai: reset colors (restore colorCustomizations)"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Z.ai Cursor Limit — General",
+        "properties": {
+          "zaiCursorLimit.apiKey": {
+            "type": "string",
+            "default": "",
+            "description": "API key of the z.ai GLM Coding Plan (works with the key from ANTHROPIC_AUTH_TOKEN)",
+            "order": 1
+          },
+          "zaiCursorLimit.statusbarEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show the indicator in the status bar; off also removes all color overrides",
+            "order": 2
+          },
+          "zaiCursorLimit.refreshSec": {
+            "type": "number",
+            "default": 300,
+            "minimum": 30,
+            "description": "Refresh interval in seconds",
+            "order": 3
+          },
+          "zaiCursorLimit.statusbarMetric": {
+            "type": "string",
+            "enum": [
+              "max",
+              "5h",
+              "weekly"
+            ],
+            "enumDescriptions": [
+              "Show the larger of the two windows (default)",
+              "Always show the 5-hour window percentage",
+              "Always show the weekly window percentage"
+            ],
+            "default": "max",
+            "description": "Which percentage the status bar number shows (the color level always follows the max)",
+            "order": 4
+          }
+        }
+      },
+      {
+        "title": "Robot Text Color — Switches",
+        "properties": {
+          "zaiCursorLimit.colorRobotOnGreen": {
+            "type": "boolean",
+            "default": true,
+            "description": "Color the robot text green while the level is green",
+            "order": 1
+          },
+          "zaiCursorLimit.colorRobotOnYellow": {
+            "type": "boolean",
+            "default": true,
+            "description": "Color the robot text yellow while the level is yellow",
+            "order": 2
+          },
+          "zaiCursorLimit.colorRobotOnRed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Color the robot text red while the level is red",
+            "order": 3
+          }
+        }
+      },
+      {
+        "title": "Robot Text Color — Hex Colors",
+        "properties": {
+          "zaiCursorLimit.greenTextDark": {
+            "type": "string",
+            "default": "#53C679",
+            "description": "Green: robot text on dark themes",
+            "order": 1
+          },
+          "zaiCursorLimit.greenTextLight": {
+            "type": "string",
+            "default": "#206035",
+            "description": "Green: robot text on light themes",
+            "order": 2
+          },
+          "zaiCursorLimit.yellowTextDark": {
+            "type": "string",
+            "default": "#C6A953",
+            "description": "Yellow: robot text on dark themes",
+            "order": 3
+          },
+          "zaiCursorLimit.yellowTextLight": {
+            "type": "string",
+            "default": "#605020",
+            "description": "Yellow: robot text on light themes",
+            "order": 4
+          },
+          "zaiCursorLimit.redTextDark": {
+            "type": "string",
+            "default": "#C65353",
+            "description": "Red: robot text on dark themes",
+            "order": 5
+          },
+          "zaiCursorLimit.redTextLight": {
+            "type": "string",
+            "default": "#672222",
+            "description": "Red: robot text on light themes",
+            "order": 6
+          }
+        }
+      },
+      {
+        "title": "Thresholds (%)",
+        "properties": {
+          "zaiCursorLimit.yellowPct": {
+            "type": "number",
+            "default": 50,
+            "description": "Yellow threshold, percent of the max window (5h vs weekly)",
+            "order": 1
+          },
+          "zaiCursorLimit.redPct": {
+            "type": "number",
+            "default": 90,
+            "description": "Red threshold, percent of the max window (5h vs weekly)",
+            "order": 2
+          }
+        }
+      },
+      {
+        "title": "Title Bar Tint — Switches",
+        "properties": {
+          "zaiCursorLimit.tintTitlebarOnGreen": {
+            "type": "boolean",
+            "default": false,
+            "description": "Tint the window title bar green while the level is green",
+            "order": 1
+          },
+          "zaiCursorLimit.tintTitlebarOnYellow": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tint the window title bar yellow while the level is yellow",
+            "order": 2
+          },
+          "zaiCursorLimit.tintTitlebarOnRed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tint the window title bar red while the level is red",
+            "order": 3
+          }
+        }
+      },
+      {
+        "title": "Title Bar Tint — Hex Colors",
+        "properties": {
+          "zaiCursorLimit.greenTintDark": {
+            "type": "string",
+            "default": "#339955",
+            "description": "Green: title bar tint on dark themes",
+            "order": 1
+          },
+          "zaiCursorLimit.greenTintLight": {
+            "type": "string",
+            "default": "#339955",
+            "description": "Green: title bar tint on light themes",
+            "order": 2
+          },
+          "zaiCursorLimit.yellowTintDark": {
+            "type": "string",
+            "default": "#8A7228",
+            "description": "Yellow: title bar tint on dark themes",
+            "order": 3
+          },
+          "zaiCursorLimit.yellowTintLight": {
+            "type": "string",
+            "default": "#8A7228",
+            "description": "Yellow: title bar tint on light themes",
+            "order": 4
+          },
+          "zaiCursorLimit.redTintDark": {
+            "type": "string",
+            "default": "#862D3B",
+            "description": "Red (burgundy): title bar tint on dark themes",
+            "order": 5
+          },
+          "zaiCursorLimit.redTintLight": {
+            "type": "string",
+            "default": "#862D3B",
+            "description": "Red: title bar tint on light themes",
+            "order": 6
+          }
+        }
+      }
+    ]
+  },
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0x3654/zai-cursor-limit.git"
+  },
+  "homepage": "https://github.com/0x3654/zai-cursor-limit#readme",
+  "bugs": {
+    "url": "https://github.com/0x3654/zai-cursor-limit/issues"
+  },
+  "keywords": [
+    "zai",
+    "z.ai",
+    "glm",
+    "coding-plan",
+    "quota",
+    "usage",
+    "limit",
+    "cursor",
+    "vscode",
+    "status-bar"
+  ]
+}

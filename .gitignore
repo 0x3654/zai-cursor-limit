@@ -1,0 +1,11 @@
+# build artifacts
+*.vsix
+
+# local secrets / backups
+.settings-backup-*.json
+
+# macOS
+.DS_Store
+
+# node
+node_modules/
