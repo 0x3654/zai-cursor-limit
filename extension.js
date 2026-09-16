@@ -143,7 +143,7 @@ function maxPercentage(q) {
   return Math.max(q.five ? q.five.pct : 0, q.week ? q.week.pct : 0);
 }
 
-function tooltipFor(q, measuredAt) {
+function tooltipFor(q, measuredAt, staleNote) {
   const md = new vscode.MarkdownString();
   md.appendMarkdown(`**[:] Z.ai GLM Coding Plan** (plan: ${q.level})\n\n`);
   if (q.five) {
@@ -156,7 +156,13 @@ function tooltipFor(q, measuredAt) {
         : '';
     md.appendMarkdown(`- weekly: **${q.week.pct}%**${nums} → resets ${fmtDateTime(q.week.resetMs)}\n`);
   }
-  md.appendMarkdown(`\nmeasured at ${fmtTime(measuredAt)} · click to refresh`);
+  if (staleNote) {
+    md.appendMarkdown(`\ndata from **${fmtTime(measuredAt)}** (stale) · click to refresh`);
+    // The error goes to the bottom: the data first, then why there is no fresh one.
+    md.appendMarkdown(`\n\n---\n\n⚠ **${staleNote}** — retrying every 5 s`);
+  } else {
+    md.appendMarkdown(`\nmeasured at ${fmtTime(measuredAt)} · click to refresh`);
+  }
   return md;
 }
 
@@ -287,13 +293,13 @@ function render(q) {
     : undefined;
   statusItem.backgroundColor = undefined;
   statusItem.command = 'zaiCursorLimit.refresh';
-  statusItem.tooltip = tooltipFor(q, lastGood ? lastGood.at : Date.now());
-  if (fetchError) {
-    statusItem.tooltip += `\n\n⚠ fetch failed: ${fetchError}\nshowing data from ${fmtTime(lastGood.at)} · retrying every 5 s`;
-  }
+  // On failures the tooltip keeps the data and appends the error at the
+  // bottom — both what we have and why there is nothing newer.
+  const md = tooltipFor(q, lastGood ? lastGood.at : Date.now(), fetchError || undefined);
   if (tintBlocked) {
-    statusItem.tooltip += '\n\n⚠ color overrides blocked: save the user settings.json';
+    md.appendMarkdown('\n\n⚠ color overrides blocked: save the user settings.json');
   }
+  statusItem.tooltip = md;
   statusItem.show();
 }
 
