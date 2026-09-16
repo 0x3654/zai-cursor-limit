@@ -2,7 +2,7 @@
   "name": "zai-cursor-limit",
   "displayName": "Z.ai Cursor Limit",
   "description": "z.ai GLM Coding Plan quota traffic light: max/5h/weekly percentage in the status bar, colored robot text, per-level title bar tint",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "0x3654",
   "license": "MIT",
   "engines": {

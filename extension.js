@@ -73,7 +73,6 @@ let testMode = false;
 // True while the last colorCustomizations write failed — typically because the
 // user settings.json is open with unsaved changes; retried every refresh.
 let tintBlocked = false;
-let tintWarned = false;
 
 function cfg() {
   return vscode.workspace.getConfiguration('zaiCursorLimit');
@@ -173,16 +172,11 @@ async function tryWriteColors(value) {
   try {
     await wbc.update('colorCustomizations', value, vscode.ConfigurationTarget.Global);
     tintBlocked = false;
-    tintWarned = false;
     return true;
   } catch (err) {
+    // The usual cause: settings.json open with unsaved changes. No toast —
+    // the tooltip already carries the "color overrides blocked" marker.
     tintBlocked = true;
-    if (!tintWarned) {
-      tintWarned = true;
-      vscode.window.showWarningMessage(
-        'Z.ai Cursor Limit: cannot write colors — the user settings.json has unsaved changes. Save it; the tint will apply on the next refresh.',
-      );
-    }
     return false;
   }
 }
@@ -360,11 +354,7 @@ async function refresh(manual) {
     lastGood = { q, at: Date.now() };
     render(q);
     await applyColors(levelOf(maxPercentage(q)));
-    if (manual) {
-      const five = q.five ? `${q.five.pct}%` : '?';
-      const week = q.week ? `${q.week.pct}%` : '?';
-      vscode.window.showInformationMessage(`Z.ai: 5h ${five} · wk ${week}`);
-    }
+    // Manual refresh updates the bar/tooltip silently — no toasts.
   } catch (err) {
     fetchError = err && err.message ? err.message : 'request failed';
     if (lastGood) {
@@ -409,9 +399,7 @@ function activate(context) {
     vscode.commands.registerCommand('zaiCursorLimit.openDashboard', () =>
       vscode.env.openExternal(vscode.Uri.parse(DASHBOARD_URL)),
     ),
-    vscode.commands.registerCommand('zaiCursorLimit.resetColors', () =>
-      restoreColors().then(() => vscode.window.showInformationMessage('Z.ai: colors reset')),
-    ),
+    vscode.commands.registerCommand('zaiCursorLimit.resetColors', () => restoreColors()),
     vscode.commands.registerCommand('zaiCursorLimit.testThresholds', async () => {
       const pick = await vscode.window.showQuickPick(
         [
